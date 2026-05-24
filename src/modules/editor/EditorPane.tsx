@@ -144,7 +144,9 @@ export const EditorPane = forwardRef<EditorPaneHandle, Props>(
                     ? s.ollamaModelId
                     : p === "openai-compatible"
                       ? s.openaiCompatibleModelId
-                      : s.autocompleteModelId;
+                      : p === "hfl"
+                        ? s.hflModelId
+                        : s.autocompleteModelId;
             return {
               enabled: s.autocompleteEnabled,
               provider: p,
@@ -154,6 +156,7 @@ export const EditorPane = forwardRef<EditorPaneHandle, Props>(
               mlxBaseURL: s.mlxBaseURL,
               ollamaBaseURL: s.ollamaBaseURL,
               openaiCompatibleBaseURL: s.openaiCompatibleBaseURL,
+              hflBaseURL: s.hflBaseURL,
             };
           },
           getPath: () => pathRef.current,

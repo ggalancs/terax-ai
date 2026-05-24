@@ -55,6 +55,9 @@ type Deps = {
   getOpenaiCompatibleBaseURL?: () => string | undefined;
   getOpenaiCompatibleModelId?: () => string | undefined;
   getOpenaiCompatibleContextLimit?: () => number | undefined;
+  getHflBaseURL?: () => string | undefined;
+  getHflModelId?: () => string | undefined;
+  getHflContextLimit?: () => number | undefined;
   onStep?: (step: string | null) => void;
   onUsage?: (delta: AgentUsageDelta) => void;
   onCompact?: (info: { droppedCount: number }) => void;
@@ -95,6 +98,9 @@ export function createContextAwareTransport(deps: Deps) {
       openaiCompatibleBaseURL: deps.getOpenaiCompatibleBaseURL?.(),
       openaiCompatibleModelId: deps.getOpenaiCompatibleModelId?.(),
       openaiCompatibleContextLimit: deps.getOpenaiCompatibleContextLimit?.(),
+      hflBaseURL: deps.getHflBaseURL?.(),
+      hflModelId: deps.getHflModelId?.(),
+      hflContextLimit: deps.getHflContextLimit?.(),
       planMode: deps.getPlanMode?.(),
       projectMemory,
       uiMessages: messagesForRun,

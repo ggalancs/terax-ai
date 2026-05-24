@@ -38,6 +38,9 @@ import {
   setOpenaiCompatibleBaseURL,
   setOpenaiCompatibleContextLimit,
   setOpenaiCompatibleModelId,
+  setHflBaseURL,
+  setHflContextLimit,
+  setHflModelId,
 } from "@/modules/settings/store";
 import {
   Add01Icon,
@@ -99,6 +102,18 @@ const LOCAL_META: Partial<Record<ProviderId, LocalMeta>> = {
     description: "Any OpenAI-compatible endpoint — vLLM, Z.AI, Fireworks, etc.",
     modelHint: null,
   },
+  hfl: {
+    urlPlaceholder: "http://localhost:11434/v1",
+    modelPlaceholder: "qwen3-coder-30b-a3b-instruct-q4_k_m",
+    description:
+      "Local HuggingFace models via the HFL server (hfl serve). OpenAI-compatible with tool calling.",
+    modelHint: (
+      <>
+        A model name from <span className="font-mono">hfl list</span> or the
+        server's <span className="font-mono">/v1/models</span> page.
+      </>
+    ),
+  },
 };
 
 export function ModelsSection() {
@@ -117,6 +132,9 @@ export function ModelsSection() {
   const compatContextLimit = usePreferencesStore(
     (s) => s.openaiCompatibleContextLimit,
   );
+  const hflBaseURL = usePreferencesStore((s) => s.hflBaseURL);
+  const hflModelId = usePreferencesStore((s) => s.hflModelId);
+  const hflContextLimit = usePreferencesStore((s) => s.hflContextLimit);
 
   useEffect(() => {
     void getAllKeys().then(setKeys);
@@ -166,6 +184,15 @@ export function ModelsSection() {
           contextLimit: compatContextLimit,
           setContextLimit: setOpenaiCompatibleContextLimit,
         };
+      case "hfl":
+        return {
+          baseURL: hflBaseURL,
+          modelId: hflModelId,
+          setBaseURL: setHflBaseURL,
+          setModelId: setHflModelId,
+          contextLimit: hflContextLimit,
+          setContextLimit: setHflContextLimit,
+        };
       default:
         return null;
     }
@@ -199,7 +226,7 @@ export function ModelsSection() {
         void cfg.setModelId("");
         if (id === "openai-compatible") void cfg.setBaseURL("");
       }
-      if (id === "openai-compatible") void onClearKey(id);
+      if (id === "openai-compatible" || id === "hfl") void onClearKey(id);
     } else {
       void onClearKey(id);
     }

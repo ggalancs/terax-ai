@@ -20,6 +20,7 @@ export type CompletionDeps = {
   mlxBaseURL?: string;
   ollamaBaseURL?: string;
   openaiCompatibleBaseURL?: string;
+  hflBaseURL?: string;
 };
 
 const MAX_OUTPUT_TOKENS_DEFAULT = 128;
@@ -46,6 +47,7 @@ export async function requestCompletion(
     mlxBaseURL: deps.mlxBaseURL,
     ollamaBaseURL: deps.ollamaBaseURL,
     openaiCompatibleBaseURL: deps.openaiCompatibleBaseURL,
+    hflBaseURL: deps.hflBaseURL,
   });
 
   const isReasoning = /\bgpt-oss\b/i.test(modelId);

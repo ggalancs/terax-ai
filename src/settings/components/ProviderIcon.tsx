@@ -1,5 +1,6 @@
 import type { ProviderId } from "@/modules/ai/config";
 import {
+  AiChipIcon,
   AppleIcon,
   ChatGptIcon,
   ClaudeIcon,
@@ -30,6 +31,7 @@ const ICON_BY_PROVIDER = {
   lmstudio: ComputerIcon,
   mlx: AppleIcon,
   ollama: ServerStack01Icon,
+  hfl: AiChipIcon,
 } as const satisfies Record<ProviderId, typeof ChatGptIcon>;
 
 type Props = {

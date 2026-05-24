@@ -1,6 +1,7 @@
 import {
   DEFAULT_AUTOCOMPLETE_MODEL,
   DEFAULT_MODEL_ID,
+  HFL_DEFAULT_BASE_URL,
   LMSTUDIO_DEFAULT_BASE_URL,
   MLX_DEFAULT_BASE_URL,
   OLLAMA_DEFAULT_BASE_URL,
@@ -70,6 +71,9 @@ export type Preferences = {
   openaiCompatibleBaseURL: string;
   openaiCompatibleModelId: string;
   openaiCompatibleContextLimit: number;
+  hflBaseURL: string;
+  hflModelId: string;
+  hflContextLimit: number;
   favoriteModelIds: string[];
   recentModelIds: string[];
   vimMode: boolean;
@@ -109,6 +113,9 @@ const KEY_OLLAMA_MODEL_ID = "ollamaModelId";
 const KEY_OPENAI_COMPAT_BASE_URL = "openaiCompatibleBaseURL";
 const KEY_OPENAI_COMPAT_MODEL_ID = "openaiCompatibleModelId";
 const KEY_OPENAI_COMPAT_CONTEXT_LIMIT = "openaiCompatibleContextLimit";
+const KEY_HFL_BASE_URL = "hflBaseURL";
+const KEY_HFL_MODEL_ID = "hflModelId";
+const KEY_HFL_CONTEXT_LIMIT = "hflContextLimit";
 const KEY_FAVORITE_MODELS = "favoriteModelIds";
 const KEY_RECENT_MODELS = "recentModelIds";
 const KEY_VIM_MODE = "vimMode";
@@ -163,6 +170,9 @@ export const DEFAULT_PREFERENCES: Preferences = {
   openaiCompatibleBaseURL: OPENAI_COMPATIBLE_DEFAULT_BASE_URL,
   openaiCompatibleModelId: "",
   openaiCompatibleContextLimit: 128_000,
+  hflBaseURL: HFL_DEFAULT_BASE_URL,
+  hflModelId: "",
+  hflContextLimit: 32_000,
   favoriteModelIds: [],
   recentModelIds: [],
   vimMode: false,
@@ -253,6 +263,11 @@ export async function loadPreferences(): Promise<Preferences> {
     openaiCompatibleContextLimit:
       get<number>(KEY_OPENAI_COMPAT_CONTEXT_LIMIT) ??
       DEFAULT_PREFERENCES.openaiCompatibleContextLimit,
+    hflBaseURL: get<string>(KEY_HFL_BASE_URL) ?? DEFAULT_PREFERENCES.hflBaseURL,
+    hflModelId:
+      get<string>(KEY_HFL_MODEL_ID) ?? DEFAULT_PREFERENCES.hflModelId,
+    hflContextLimit:
+      get<number>(KEY_HFL_CONTEXT_LIMIT) ?? DEFAULT_PREFERENCES.hflContextLimit,
     favoriteModelIds:
       get<string[]>(KEY_FAVORITE_MODELS) ??
       DEFAULT_PREFERENCES.favoriteModelIds,
@@ -404,6 +419,21 @@ export async function setOpenaiCompatibleContextLimit(
     ? Math.max(1_000, Math.round(value))
     : DEFAULT_PREFERENCES.openaiCompatibleContextLimit;
   await writePref(KEY_OPENAI_COMPAT_CONTEXT_LIMIT, clamped);
+}
+
+export async function setHflBaseURL(value: string): Promise<void> {
+  await writePref(KEY_HFL_BASE_URL, value);
+}
+
+export async function setHflModelId(value: string): Promise<void> {
+  await writePref(KEY_HFL_MODEL_ID, value);
+}
+
+export async function setHflContextLimit(value: number): Promise<void> {
+  const clamped = Number.isFinite(value)
+    ? Math.max(1_000, Math.round(value))
+    : DEFAULT_PREFERENCES.hflContextLimit;
+  await writePref(KEY_HFL_CONTEXT_LIMIT, clamped);
 }
 
 export async function setFavoriteModelIds(value: string[]): Promise<void> {
