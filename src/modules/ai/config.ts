@@ -13,7 +13,8 @@ export type ProviderId =
   | "openai-compatible"
   | "lmstudio"
   | "mlx"
-  | "ollama";
+  | "ollama"
+  | "hfl";
 
 export type ProviderInfo = {
   id: ProviderId;
@@ -117,6 +118,14 @@ export const PROVIDERS: readonly ProviderInfo[] = [
     keyringAccount: "",
     keyPrefix: null,
     consoleUrl: "https://ollama.com/download",
+  },
+  {
+    id: "hfl",
+    label: "HFL",
+    keyringAccount: "hfl-api-key",
+    keyPrefix: null,
+    consoleUrl: "https://github.com/ggalancs/hfl",
+    keyOptional: true,
   },
 ] as const;
 
@@ -594,6 +603,17 @@ export const MODELS = [
     description: "Local models via Ollama.",
     capabilities: { intelligence: 3, speed: 3, cost: 5 },
   },
+
+  // ── HFL (local; OpenAI-compatible server; model id user-supplied) ─────────
+  {
+    id: "hfl-local",
+    provider: "hfl",
+    label: "HFL",
+    hint: "Local",
+    description: "Local HuggingFace models via the HFL server.",
+    capabilities: { intelligence: 3, speed: 3, cost: 5 },
+    tags: ["tools", "coding"],
+  },
 ] as const satisfies readonly ModelInfo[];
 
 export type ModelId = (typeof MODELS)[number]["id"];
@@ -654,6 +674,7 @@ export const MODEL_CONTEXT_LIMITS: Record<string, number> = {
   "lmstudio-local": 32_000,
   "mlx-local": 32_000,
   "ollama-local": 32_000,
+  "hfl-local": 32_000,
   "mistral-large-latest": 131_072,
   "mistral-medium-latest": 32_768,
   "codestral-latest": 256_000,
@@ -662,10 +683,12 @@ export const MODEL_CONTEXT_LIMITS: Record<string, number> = {
 export function getModelContextLimit(
   modelId: string | undefined,
   compatOverride?: number,
+  hflOverride?: number,
 ): number {
   if (!modelId) return 128_000;
   if (modelId === "openai-compatible-custom" && compatOverride)
     return compatOverride;
+  if (modelId === "hfl-local" && hflOverride) return hflOverride;
   return MODEL_CONTEXT_LIMITS[modelId] ?? 128_000;
 }
 
@@ -718,6 +741,7 @@ export const KEYLESS_PROVIDERS: readonly ProviderId[] = [
   "mlx",
   "ollama",
   "openai-compatible",
+  "hfl",
 ] as const;
 
 export function providerNeedsKey(id: ProviderId): boolean {
@@ -748,6 +772,7 @@ export const DEFAULT_AUTOCOMPLETE_MODEL: Partial<Record<ProviderId, string>> = {
   deepseek: "deepseek-v4-flash",
   openrouter: "openai/gpt-5.4-mini",
   "openai-compatible": "",
+  hfl: "",
 };
 
 /** Curated list of fast models suitable for inline completion (speed ≥ 4). */
@@ -760,6 +785,7 @@ export function getAutocompleteEligibleModels(): readonly ModelInfo[] {
 export const LMSTUDIO_DEFAULT_BASE_URL = "http://localhost:1234/v1";
 export const MLX_DEFAULT_BASE_URL = "http://127.0.0.1:8080/v1";
 export const OLLAMA_DEFAULT_BASE_URL = "http://localhost:11434/v1";
+export const HFL_DEFAULT_BASE_URL = "http://localhost:11434/v1";
 export const OPENAI_COMPATIBLE_DEFAULT_BASE_URL = "";
 export const MAX_AGENT_STEPS = 24;
 export const TERMINAL_BUFFER_LINES = 300;

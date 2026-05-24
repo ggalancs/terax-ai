@@ -257,6 +257,9 @@ function makeChat(sessionId: string): Chat<UIMessage> {
       usePreferencesStore.getState().openaiCompatibleModelId,
     getOpenaiCompatibleContextLimit: () =>
       usePreferencesStore.getState().openaiCompatibleContextLimit,
+    getHflBaseURL: () => usePreferencesStore.getState().hflBaseURL,
+    getHflModelId: () => usePreferencesStore.getState().hflModelId,
+    getHflContextLimit: () => usePreferencesStore.getState().hflContextLimit,
     onStep: (step) => {
       useChatStore.getState().patchAgentMeta({ step });
     },

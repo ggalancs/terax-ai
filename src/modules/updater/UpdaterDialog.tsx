@@ -38,7 +38,10 @@ function formatBytes(n: number): string {
 }
 
 export function UpdaterDialog() {
-  const { status, install, dismiss } = useUpdater();
+  // Auto-update disabled on this fork: the upstream updater endpoint
+  // (crynta/terax-ai) would replace this HFL-enabled build with a release
+  // that lacks it. Manual "check for updates" in Settings - About still works.
+  const { status, install, dismiss } = useUpdater({ autoCheck: false });
   const [copied, setCopied] = useState(false);
   const [distro, setDistro] = useState<DistroKey>("arch");
   const manualVersion =

@@ -394,12 +394,15 @@ export default function App() {
   const openaiCompatibleBaseURL = usePreferencesStore(
     (s) => s.openaiCompatibleBaseURL,
   );
+  const hflModelId = usePreferencesStore((s) => s.hflModelId);
+  const hflBaseURL = usePreferencesStore((s) => s.hflBaseURL);
   const hasLocalModel =
     (lmstudioBaseURL.trim().length > 0 && lmstudioModelId.trim().length > 0) ||
     (mlxBaseURL.trim().length > 0 && mlxModelId.trim().length > 0) ||
     (ollamaBaseURL.trim().length > 0 && ollamaModelId.trim().length > 0) ||
     (openaiCompatibleBaseURL.trim().length > 0 &&
-      openaiCompatibleModelId.trim().length > 0);
+      openaiCompatibleModelId.trim().length > 0) ||
+    (hflBaseURL.trim().length > 0 && hflModelId.trim().length > 0);
   const hasComposer = hasAnyKey(apiKeys) || hasLocalModel;
 
   const [keysLoaded, setKeysLoaded] = useState(false);

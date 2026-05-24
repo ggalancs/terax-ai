@@ -11,6 +11,7 @@ import {
   DEFAULT_MODEL_ID,
   getModel,
   getModelContextLimit,
+  HFL_DEFAULT_BASE_URL,
   LMSTUDIO_DEFAULT_BASE_URL,
   MAX_AGENT_STEPS,
   MLX_DEFAULT_BASE_URL,
@@ -66,6 +67,7 @@ export type BuildModelOptions = {
   mlxBaseURL?: string;
   ollamaBaseURL?: string;
   openaiCompatibleBaseURL?: string;
+  hflBaseURL?: string;
 };
 
 const modelCache = new Map<string, LanguageModel>();
@@ -86,7 +88,8 @@ export async function buildLanguageModel(
   const mlxURL = options.mlxBaseURL ?? MLX_DEFAULT_BASE_URL;
   const ollamaURL = options.ollamaBaseURL ?? OLLAMA_DEFAULT_BASE_URL;
   const compatURL = options.openaiCompatibleBaseURL ?? "";
-  const cacheKey = `${provider} ${key} ${resolvedModelId} ${lmstudioURL} ${mlxURL} ${ollamaURL} ${compatURL}`;
+  const hflURL = options.hflBaseURL ?? HFL_DEFAULT_BASE_URL;
+  const cacheKey = `${provider} ${key} ${resolvedModelId} ${lmstudioURL} ${mlxURL} ${ollamaURL} ${compatURL} ${hflURL}`;
   const hit = modelCache.get(cacheKey);
   if (hit) return hit;
 
@@ -202,6 +205,17 @@ export async function buildLanguageModel(
       })(resolvedModelId);
       break;
     }
+    case "hfl": {
+      const { createOpenAICompatible } =
+        await import("@ai-sdk/openai-compatible");
+      built = createOpenAICompatible({
+        name: "hfl",
+        baseURL: hflURL,
+        apiKey: key || undefined,
+        fetch: localProxyFetch,
+      })(resolvedModelId);
+      break;
+    }
     default: {
       const _exhaustive: never = provider;
       throw new Error(`Unsupported provider: ${_exhaustive as ProviderId}`);
@@ -220,6 +234,8 @@ export type LocalProviderConfig = {
   ollamaModelId?: string;
   openaiCompatibleBaseURL?: string;
   openaiCompatibleModelId?: string;
+  hflBaseURL?: string;
+  hflModelId?: string;
 };
 
 export function buildConfiguredLanguageModel(
@@ -257,12 +273,20 @@ export function buildConfiguredLanguageModel(
       );
     }
     resolvedId = local.openaiCompatibleModelId.trim();
+  } else if (m.id === "hfl-local") {
+    if (!local.hflModelId?.trim()) {
+      throw new Error(
+        "HFL: no model id set. Open Settings → Models and enter a model name served by your HFL server.",
+      );
+    }
+    resolvedId = local.hflModelId.trim();
   }
   return buildLanguageModel(m.provider, keys, resolvedId, {
     lmstudioBaseURL: local.lmstudioBaseURL,
     mlxBaseURL: local.mlxBaseURL,
     ollamaBaseURL: local.ollamaBaseURL,
     openaiCompatibleBaseURL: local.openaiCompatibleBaseURL,
+    hflBaseURL: local.hflBaseURL,
   });
 }
 
@@ -347,6 +371,9 @@ export type RunAgentOptions = {
   openaiCompatibleBaseURL?: string;
   openaiCompatibleModelId?: string;
   openaiCompatibleContextLimit?: number;
+  hflBaseURL?: string;
+  hflModelId?: string;
+  hflContextLimit?: number;
   planMode?: boolean;
   projectMemory?: string | null;
   uiMessages: UIMessage[];
@@ -364,6 +391,8 @@ export async function runAgentStream(opts: RunAgentOptions) {
     ollamaModelId: opts.ollamaModelId,
     openaiCompatibleBaseURL: opts.openaiCompatibleBaseURL,
     openaiCompatibleModelId: opts.openaiCompatibleModelId,
+    hflBaseURL: opts.hflBaseURL,
+    hflModelId: opts.hflModelId,
   });
   const provider = getModel(modelId).provider;
 
@@ -385,6 +414,7 @@ export async function runAgentStream(opts: RunAgentOptions) {
     getModelContextLimit(
       getModel(modelId).id,
       opts.openaiCompatibleContextLimit,
+      opts.hflContextLimit,
     ),
   );
   const compactedHistory = compact.messages;
